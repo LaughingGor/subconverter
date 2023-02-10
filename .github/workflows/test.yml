@@ -19,7 +19,7 @@ jobs:
         # user of the server
         user: root
         # private ssh key registered on the server
-        private_key: ${{ test.ssh_key }}
+        private_key: ${{ secrets.TEST }}
         # Fingerprint of the server, preventing man-in-the-middle attacks
         # command to be executed
         command: touch xxx
