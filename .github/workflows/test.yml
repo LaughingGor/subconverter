@@ -1,0 +1,26 @@
+name: learn-github-actions
+run-name: ${{ github.actor }} is learning GitHub Actions
+on: [push]
+jobs:
+  ssh-test:
+    name: test ssh
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: SSH Command
+      # You may pin to the exact commit or the version.
+      # uses: D3rHase/ssh-command-action@51ec3cec93e9557d7a5289c1e31a4a28185e5200
+      uses: D3rHase/ssh-command-action@v0.2.2
+      with:
+        # hostname / IP of the server
+        host: ubuntu.freedoby.top
+        # ssh port of the server
+        port: 30090
+        # user of the server
+        user: root
+        # private ssh key registered on the server
+        private_key: ${{ test.ssh_key }}
+        # Fingerprint of the server, preventing man-in-the-middle attacks
+        # command to be executed
+        command: touch xxx
+      
