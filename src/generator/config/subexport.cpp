@@ -339,6 +339,27 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 continue;
             }
             break;
+        case ProxyType::VLess:
+        {
+            singleproxy["type"] = "vless";
+            singleproxy["uuid"] = x.UserId;
+            singleproxy["tls"] = x.TLSSecure;
+
+            singleproxy["network"] = x.TransferProtocol;
+            singleproxy["servername"] = x.Hostname;
+
+            YAML::Node ws_opts;
+    
+            ws_opts["path"] = x.Path;
+
+            YAML::Node headers;
+            headers["Host"] = x.Host;
+            
+            ws_opts["headers"] = headers;
+            singleproxy["ws-opts"] = ws_opts;
+
+            break;
+        }
         case ProxyType::ShadowsocksR:
             //ignoring all nodes with unsupported obfs, protocols and encryption
             if(ext.filter_deprecated)

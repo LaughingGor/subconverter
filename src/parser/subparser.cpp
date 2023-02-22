@@ -61,6 +61,31 @@ void vmessConstruct(Proxy &node, const std::string &group, const std::string &re
     node.TLSSecure = tls == "tls";
 }
 
+void vlessConstruct(Proxy &node, 
+                const std::string &group, 
+                const std::string &remarks, 
+                const std::string &add, 
+                const std::string &port, 
+                const std::string &type, 
+                const std::string &id, 
+                const std::string &security, 
+                const std::string &path, 
+                const std::string &host, 
+                tribool udp, 
+                tribool tfo, 
+                tribool scv, 
+                tribool tls13)
+{
+    //vlessConstruct(node, XRAY_DEFAULT_GROUP, remarks, add, port, type, id, net, "auto", path, host, "", tls, "");
+
+    commonConstruct(node, ProxyType::VLess, group, remarks, add, port, udp, tfo, scv, tls13);
+    node.UserId = id.empty() ? "00000000-0000-0000-0000-000000000000" : id;
+    node.TransferProtocol = type;
+    node.Host = host;
+    node.Path = path;
+    node.TLSSecure = security == "tls";
+}
+
 void ssrConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &protocol, const std::string &method, const std::string &obfs, const std::string &password, const std::string &obfsparam, const std::string &protoparam, tribool udp, tribool tfo, tribool scv)
 {
     commonConstruct(node, ProxyType::ShadowsocksR, group, remarks, server, port, udp, tfo, scv, tribool());
@@ -183,6 +208,19 @@ void explodeVmess(std::string vmess, Proxy &node)
     add = trim(add);
 
     vmessConstruct(node, V2RAY_DEFAULT_GROUP, ps, add, port, type, id, aid, net, "auto", path, host, "", tls, sni);
+}
+
+void explodeVless(std::string vless, Proxy &node)
+{
+    std::string version, ps, add, port, type, id, aid, net, path, host, tls, sni;
+    Document jsondata;
+    std::vector<std::string> vArray;
+
+    if(regMatch(vless, "vless://(.*?)@(.*)"))
+    {
+        explodeStdVLess(vless, node);
+        return;
+    }
 }
 
 void explodeVmessConf(std::string content, std::vector<Proxy> &nodes)
@@ -1197,6 +1235,59 @@ void explodeStdVMess(std::string vmess, Proxy &node)
     return;
 }
 
+void explodeStdVLess(std::string vless, Proxy &node)
+{
+    std::string add, port, type, id, net, path, security, encryption, host, remarks;
+    std::string addition;
+    vless = vless.substr(8);
+    string_size pos;
+
+    pos = vless.rfind("#");
+    if(pos != vless.npos)
+    {
+        remarks = urlDecode(vless.substr(pos + 1));
+        vless.erase(pos);
+    }
+    const std::string stdvless_matcher = R"(^([\da-f]{4}(?:[\da-f]{4}-){4}[\da-f]{12})@(.+):(\d+)(?:\?(.*))?$)";
+    if(regGetMatch(vless, stdvless_matcher, 5, 0, &id, &add, &port, &addition))
+        return;
+
+    type = getUrlArg(addition, "type");
+    // encryption = getUrlArg(addition, "encryption");
+    // if (encryption.empty())
+    // {
+    //     encryption = "auto";
+    // }
+    security = getUrlArg(addition, "security");
+    if (security.empty())
+    {
+        security = "none";
+    }
+
+    host = getUrlArg(addition, "host");
+    if (host.empty())
+    {
+        host = add;
+    }
+    path = getUrlArg(addition, "path");
+
+    if(remarks.empty())
+        remarks = add + ":" + port;
+
+    vlessConstruct(node, 
+                XRAY_DEFAULT_GROUP, 
+                remarks, 
+                add, 
+                port, 
+                type, 
+                id, 
+                security,
+                path, 
+                host);
+    return;
+}
+
+
 void explodeShadowrocket(std::string rocket, Proxy &node)
 {
     std::string add, port, type, id, aid, net = "tcp", path, host, tls, cipher, remarks;
@@ -2069,6 +2160,8 @@ void explode(const std::string &link, Proxy &node)
         explodeSSR(link, node);
     else if(strFind(link, "vmess://") || strFind(link, "vmess1://"))
         explodeVmess(link, node);
+    else if(strFind(link, "vless://"))
+        explodeVless(link, node);
     else if(strFind(link, "ss://"))
         explodeSS(link, node);
     else if(strFind(link, "socks://") || strFind(link, "https://t.me/socks") || strFind(link, "tg://socks"))
