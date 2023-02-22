@@ -310,7 +310,7 @@ jobs:
             [worker.oci]
               max-parallelism = 1
 
-      # - name: Download artifact
+      - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           path: /tmp/images/
