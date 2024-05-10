@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  REGISTRY_IMAGE: longzhiyi6608/subconverter
+  REGISTRY_IMAGE: longzhiyi/subconverter
 
 jobs:
   build:
