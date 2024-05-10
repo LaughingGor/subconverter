@@ -2361,7 +2361,7 @@ void explodeSub(std::string sub, std::vector<Proxy> &nodes)
     if(!processed)
     {
         sub = urlSafeBase64Decode(sub);
-        if(regFind(sub, "(vmess|shadowsocks|http|trojan)\\s*?="))
+        if(regFind(sub, "(vmess|shadowsocks|http|trojan|vless)\\s*?="))
         {
             if(explodeSurge(sub, nodes))
                 return;
