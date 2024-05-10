@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM alpine:3.16 AS builder
 LABEL maintainer "longzhiyi6608@gmail.com"
 ARG THREADS="4"
 ARG SHA=""
