@@ -385,7 +385,7 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             if (x.security == "reality") {
                 YAML::Node reality_opts;
                 reality_opts["public-key"] = x.pbk;
-                reality_opts["sid"] = x.sid;
+                reality_opts["short-id"] = x.sid;
                 singleproxy["reality-opts"] = reality_opts;
                 
             }
@@ -625,6 +625,43 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
         yamlnode["Proxy Group"] = original_groups;
 }
 
+
+void serializeNode(const YAML::Node& node, YAML::Emitter& out) {
+    switch (node.Type()) {
+        case YAML::NodeType::Null:
+            out << YAML::Null;
+            break;
+        case YAML::NodeType::Scalar:
+            // 为了示例，我们假设所有的标量都应该双引号输出
+            out << node.Scalar();
+            //out << YAML::DoubleQuoted << node.Scalar();
+
+            break;
+        case YAML::NodeType::Sequence:
+            out << YAML::BeginSeq;
+            for (size_t i = 0; i < node.size(); i++) {
+                serializeNode(node[i], out);
+            }
+            out << YAML::EndSeq;
+            break;
+        case YAML::NodeType::Map:
+            out << YAML::BeginMap;
+            for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
+                out << YAML::Key;
+                serializeNode(it->first, out);
+                if ( it->first.as<std::string>() == "short-id")
+                    out << YAML::DoubleQuoted;
+                out << YAML::Value;
+                serializeNode(it->second, out);
+            }
+            out << YAML::EndMap;
+            break;
+        default:
+            throw std::runtime_error("Unknown node type.");
+    }
+}
+
+
 std::string proxyToClash(std::vector<Proxy> &nodes, const std::string &base_conf, std::vector<RulesetContent> &ruleset_content_array, const ProxyGroupConfigs &extra_proxy_group, bool clashR, extra_settings &ext)
 {
     YAML::Node yamlnode;
@@ -668,6 +705,9 @@ std::string proxyToClash(std::vector<Proxy> &nodes, const std::string &base_conf
     }
 
     std::string output_content = rulesetToClashStr(yamlnode, ruleset_content_array, ext.overwrite_original_rules, ext.clash_new_field_name);
+    //YAML::Emitter out;
+    //serializeNode(yamlnode, out);
+    //output_content.insert(0, out.c_str());
     output_content.insert(0, YAML::Dump(yamlnode));
     //rulesetToClash(yamlnode, ruleset_content_array, ext.overwrite_original_rules, ext.clash_new_field_name);
     //std::string output_content = YAML::Dump(yamlnode);
