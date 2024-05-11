@@ -71,11 +71,18 @@ void vlessConstruct(Proxy &node,
                 const std::string &id, 
                 const std::string &security, 
                 const std::string &path, 
-                const std::string &host, 
+                const std::string &host,
+                const std::string &flow,
+                const std::string &sni,
+                const std::string &fp,
+                const std::string &pbk,
+                const std::string &sid, 
                 tribool udp, 
                 tribool tfo, 
                 tribool scv, 
-                tribool tls13)
+                tribool tls13
+                )
+
 {
     //vlessConstruct(node, XRAY_DEFAULT_GROUP, remarks, add, port, type, id, net, "auto", path, host, "", tls, "");
 
@@ -84,7 +91,14 @@ void vlessConstruct(Proxy &node,
     node.TransferProtocol = type;
     node.Host = host;
     node.Path = path;
-    node.TLSSecure = security == "tls";
+    node.security = security;
+    node.TLSSecure = security == "tls" || security == "reality";
+    node.security = security;
+    node.flow = flow;
+    node.sni = sni;
+    node.fp = fp;
+    node.pbk = pbk;
+    node.sid = sid;
 }
 
 void ssrConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &protocol, const std::string &method, const std::string &obfs, const std::string &password, const std::string &obfsparam, const std::string &protoparam, tribool udp, tribool tfo, tribool scv)
@@ -1284,6 +1298,7 @@ void explodeStdVMess(std::string vmess, Proxy &node)
 void explodeStdVLess(std::string vless, Proxy &node)
 {
     std::string add, port, type, id, net, path, security, encryption, host, remarks;
+    std::string flow, sni, fp, pbk, sid;
     std::string addition;
     vless = vless.substr(8);
     string_size pos;
@@ -1304,10 +1319,40 @@ void explodeStdVLess(std::string vless, Proxy &node)
     // {
     //     encryption = "auto";
     // }
+    flow = getUrlArg(addition, "flow");
+    if (flow.empty())
+    {
+        flow = "none";
+    }
+
     security = getUrlArg(addition, "security");
     if (security.empty())
     {
         security = "none";
+    }
+
+    sni = getUrlArg(addition, "sni");
+    if (sni.empty())
+    {
+        sni = "none";
+    }
+
+    fp = getUrlArg(addition, "fp");
+    if (fp.empty())
+    {
+        fp = "none";
+    }
+
+    pbk = getUrlArg(addition, "pbk");
+    if (pbk.empty())
+    {
+        pbk = "none";
+    }
+
+    sid = getUrlArg(addition, "sid");
+    if (sid.empty())
+    {
+        sid = "none";
     }
 
     host = getUrlArg(addition, "host");
@@ -1329,7 +1374,12 @@ void explodeStdVLess(std::string vless, Proxy &node)
                 id, 
                 security,
                 path, 
-                host);
+                host,
+                flow,
+                sni,
+                fp,
+                pbk,
+                sid);
     return;
 }
 
@@ -2358,6 +2408,33 @@ void explodeSub(std::string sub, std::vector<Proxy> &nodes)
     }
 
     //try to parse as normal subscription
+
+    //try no base64 decode
+
+    if (!processed) 
+    {
+        if(regFind(sub, "(vmess|shadowsocks|http|trojan)\\s*?="))
+        {
+            if(explodeSurge(sub, nodes))
+                return;
+        }
+        strstream << sub;
+        char delimiter = count(sub.begin(), sub.end(), '\n') < 1 ? count(sub.begin(), sub.end(), '\r') < 1 ? ' ' : '\r' : '\n';
+        while(getline(strstream, strLink, delimiter))
+        {
+            Proxy node;
+            if(strLink.rfind('\r') != std::string::npos)
+                strLink.erase(strLink.size() - 1);
+            explode(strLink, node);
+            if(strLink.empty() || node.Type == ProxyType::Unknown)
+            {
+                continue;
+            }
+            nodes.emplace_back(std::move(node));
+            processed = true;
+        }
+    }
+    
     if(!processed)
     {
         sub = urlSafeBase64Decode(sub);

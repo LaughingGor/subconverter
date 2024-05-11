@@ -373,16 +373,35 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             singleproxy["network"] = x.TransferProtocol;
             singleproxy["servername"] = x.Hostname;
 
-            YAML::Node ws_opts;
-    
-            ws_opts["path"] = x.Path;
+            if (!x.Path.empty()) {
+                YAML::Node ws_opts;
+                ws_opts["path"] = x.Path;
+                YAML::Node headers;
+                headers["Host"] = x.Host;
+                ws_opts["headers"] = headers;
+                singleproxy["ws-opts"] = ws_opts;
+            }
 
-            YAML::Node headers;
-            headers["Host"] = x.Host;
+            if (x.security == "reality") {
+                YAML::Node reality_opts;
+                reality_opts["public-key"] = x.pbk;
+                reality_opts["sid"] = x.sid;
+                singleproxy["reality-opts"] = reality_opts;
+                
+            }
+
+            if (!x.sni.empty()) {
+                singleproxy["sni"] = x.sni;
+            }
+
+            if (!x.flow.empty()) {
+                singleproxy["flow"] = x.flow;
+            }
             
-            ws_opts["headers"] = headers;
-            singleproxy["ws-opts"] = ws_opts;
-
+            if (!x.fp.empty()) {
+                singleproxy["client-fingerprint"] = x.fp;
+            }
+            
             break;
         }
         case ProxyType::ShadowsocksR:

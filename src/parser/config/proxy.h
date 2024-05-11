@@ -102,6 +102,14 @@ struct Proxy
     uint16_t KeepAlive = 0;
     String TestUrl;
     String ClientId;
+
+    //vless define
+    String flow;
+    String security;
+    String sni;
+    String fp;
+    String pbk;
+    String sid; 
 };
 
 #define SS_DEFAULT_GROUP "SSProvider"

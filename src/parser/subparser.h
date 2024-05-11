@@ -31,10 +31,16 @@ void vlessConstruct(Proxy &node,
                 const std::string &security, 
                 const std::string &path, 
                 const std::string &host, 
+                const std::string &flow,
+                const std::string &sni,
+                const std::string &fp,
+                const std::string &pbk,
+                const std::string &sid,
                 tribool udp = tribool(), 
                 tribool tfo = tribool(), 
                 tribool scv = tribool(), 
-                tribool tls13 = tribool());
+                tribool tls13 = tribool()
+                );
 void ssrConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &protocol, const std::string &method, const std::string &obfs, const std::string &password, const std::string &obfsparam, const std::string &protoparam, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool());
 void ssConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &password, const std::string &method, const std::string &plugin, const std::string &pluginopts, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool(), tribool tls13 = tribool());
 void socksConstruct(Proxy &node, const std::string &group, const std::string &remarks, const std::string &server, const std::string &port, const std::string &username, const std::string &password, tribool udp = tribool(), tribool tfo = tribool(), tribool scv = tribool());
