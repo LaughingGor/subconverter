@@ -387,12 +387,12 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 reality_opts["public-key"] = x.pbk;
                 reality_opts["short-id"] = x.sid;
                 singleproxy["reality-opts"] = reality_opts;
-                
+                singleproxy["servername"] = x.sni;
             }
 
-            if (!x.sni.empty()) {
-                singleproxy["sni"] = x.sni;
-            }
+            // if (!x.sni.empty()) {
+            //     singleproxy["sni"] = x.sni;
+            // }
 
             if (!x.flow.empty()) {
                 singleproxy["flow"] = x.flow;
