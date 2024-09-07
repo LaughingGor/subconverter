@@ -2418,6 +2418,9 @@ void explodeSub(std::string sub, std::vector<Proxy> &nodes)
             if(explodeSurge(sub, nodes))
                 return;
         }
+        strLink.clear();
+        strstream.str("");
+        strstream.clear();
         strstream << sub;
         char delimiter = count(sub.begin(), sub.end(), '\n') < 1 ? count(sub.begin(), sub.end(), '\r') < 1 ? ' ' : '\r' : '\n';
         while(getline(strstream, strLink, delimiter))
@@ -2437,14 +2440,17 @@ void explodeSub(std::string sub, std::vector<Proxy> &nodes)
     
     if(!processed)
     {
-        sub = urlSafeBase64Decode(sub);
-        if(regFind(sub, "(vmess|shadowsocks|http|trojan|vless)\\s*?="))
+        std::string decode_sub = urlSafeBase64Decode(sub);
+        if(regFind(decode_sub, "(vmess|shadowsocks|http|trojan|vless)\\s*?="))
         {
-            if(explodeSurge(sub, nodes))
+            if(explodeSurge(decode_sub, nodes))
                 return;
         }
-        strstream << sub;
-        char delimiter = count(sub.begin(), sub.end(), '\n') < 1 ? count(sub.begin(), sub.end(), '\r') < 1 ? ' ' : '\r' : '\n';
+        strLink.clear();
+        strstream.str("");
+        strstream.clear();
+        strstream << decode_sub;
+        char delimiter = count(decode_sub.begin(), decode_sub.end(), '\n') < 1 ? count(decode_sub.begin(), decode_sub.end(), '\r') < 1 ? ' ' : '\r' : '\n';
         while(getline(strstream, strLink, delimiter))
         {
             Proxy node;
